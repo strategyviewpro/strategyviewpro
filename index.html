@@ -5,35 +5,163 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>StrategyView - Cloud Terminal</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
-    body { background: #131722; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+    * { 
+      box-sizing: border-box; 
+      margin: 0; 
+      padding: 0; 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      -webkit-tap-highlight-color: transparent; 
+    }
+    body { 
+      background: #131722; 
+      color: #d1d4dc; 
+      height: 100vh; 
+      display: flex; 
+      flex-direction: column; 
+      overflow: hidden; 
+    }
 
     /* Top Bar */
-    header { height: 46px; background: #1e222d; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
-    .brand { font-size: 14px; font-weight: bold; color: #2962ff; }
-    .top-actions { display: flex; align-items: center; gap: 8px; }
-    .cur-btn { background: #131722; color: #d1d4dc; border: 1px solid #2a2e39; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
-    .wallet-box { background: #131722; border: 1px solid #2a2e39; padding: 4px 8px; border-radius: 4px; font-size: 12px; }
-    .fund-val { color: #26a69a; font-weight: bold; }
+    header { 
+      height: 44px; 
+      background: #1e222d; 
+      border-bottom: 1px solid #2a2e39; 
+      display: flex; 
+      align-items: center; 
+      justify-content: space-between; 
+      padding: 0 10px; 
+      flex-shrink: 0; 
+    }
+    .brand { 
+      font-size: 14px; 
+      font-weight: 800; 
+      color: #2962ff; 
+      letter-spacing: 0.5px;
+    }
+    .top-actions { 
+      display: flex; 
+      align-items: center; 
+      gap: 6px; 
+    }
+    .cur-btn { 
+      background: #131722; 
+      color: #d1d4dc; 
+      border: 1px solid #2a2e39; 
+      padding: 4px 6px; 
+      border-radius: 4px; 
+      font-size: 11px; 
+    }
+    .wallet-box { 
+      background: #131722; 
+      border: 1px solid #2a2e39; 
+      padding: 4px 8px; 
+      border-radius: 4px; 
+      font-size: 11px; 
+    }
+    .fund-val { 
+      color: #26a69a; 
+      font-weight: bold; 
+    }
 
-    /* Chart Container */
-    #chart-box { flex: 1; width: 100%; position: relative; }
+    /* 100% Full Chart - Zero Overlay on Tools */
+    #chart-box { 
+      flex: 1; 
+      width: 100%; 
+      position: relative; 
+      background: #131722;
+    }
 
-    /* Floating Buy/Sell over Chart */
-    .order-overlay { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(30, 34, 45, 0.9); border: 1px solid #2a2e39; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 8px; }
-    .qty-input { width: 55px; background: #131722; border: 1px solid #363a45; color: #fff; padding: 4px; border-radius: 4px; font-size: 11px; text-align: center; }
-    .btn-buy { background: #26a69a; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
-    .btn-sell { background: #ef5350; color: #fff; border: none; padding: 6px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
+    /* Dedicated Bottom Thumb Action Bar */
+    .bottom-order-bar {
+      height: 52px;
+      background: #1e222d;
+      border-top: 1px solid #2a2e39;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 12px;
+      gap: 8px;
+      flex-shrink: 0;
+      z-index: 10;
+    }
+    .lot-control {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: #131722;
+      border: 1px solid #2a2e39;
+      padding: 4px 8px;
+      border-radius: 6px;
+    }
+    .lot-control span {
+      font-size: 11px;
+      color: #787b86;
+    }
+    .qty-input { 
+      width: 55px; 
+      background: transparent; 
+      border: none; 
+      color: #fff; 
+      font-size: 12px; 
+      font-weight: bold; 
+      text-align: center;
+      outline: none;
+    }
+    .btn-group {
+      display: flex;
+      gap: 8px;
+      flex: 1;
+      justify-content: flex-end;
+    }
+    .btn-trade {
+      flex: 1;
+      max-width: 120px;
+      padding: 10px 0;
+      border-radius: 6px;
+      font-weight: bold;
+      font-size: 12px;
+      border: none;
+      cursor: pointer;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+    .btn-buy { 
+      background: #26a69a; 
+      color: #fff; 
+    }
+    .btn-buy:active { opacity: 0.8; }
+    .btn-sell { 
+      background: #ef5350; 
+      color: #fff; 
+    }
+    .btn-sell:active { opacity: 0.8; }
 
-    /* Bottom Logs */
-    .logs-panel { height: 95px; background: #1e222d; border-top: 1px solid #2a2e39; flex-shrink: 0; font-size: 11px; overflow-y: auto; padding: 6px 10px; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 4px; text-align: left; border-bottom: 1px solid #21262d; }
-    th { color: #787b86; }
+    /* Collapsible Bottom Trade History Panel */
+    .logs-panel { 
+      height: 85px; 
+      background: #131722; 
+      border-top: 1px solid #2a2e39; 
+      flex-shrink: 0; 
+      font-size: 11px; 
+      overflow-y: auto; 
+      padding: 4px 10px; 
+    }
+    table { 
+      width: 100%; 
+      border-collapse: collapse; 
+    }
+    th, td { 
+      padding: 4px 6px; 
+      text-align: left; 
+      border-bottom: 1px solid #1e222d; 
+    }
+    th { color: #787b86; font-size: 10px; }
   </style>
 </head>
 <body>
 
+  <!-- Top Navigation -->
   <header>
     <span class="brand">⚡ StrategyView</span>
     <div class="top-actions">
@@ -48,22 +176,31 @@
     </div>
   </header>
 
+  <!-- Clean Chart (All Drawing Tools & Indicators Unblocked) -->
   <div id="chart-box">
-    <div class="order-overlay">
-      <input type="number" id="trade-qty" class="qty-input" value="0.05" step="0.01">
-      <button class="btn-buy" onclick="runTrade('BUY')">BUY</button>
-      <button class="btn-sell" onclick="runTrade('SELL')">SELL</button>
-    </div>
     <div id="tv_chart" style="height:100%; width:100%;"></div>
   </div>
 
+  <!-- Bottom Fast Execution Bar (Right under user thumb) -->
+  <div class="bottom-order-bar">
+    <div class="lot-control">
+      <span>Qty:</span>
+      <input type="number" id="trade-qty" class="qty-input" value="0.05" step="0.01" min="0.01">
+    </div>
+    <div class="btn-group">
+      <button class="btn-trade btn-buy" onclick="runTrade('BUY')">BUY / LONG</button>
+      <button class="btn-trade btn-sell" onclick="runTrade('SELL')">SELL / SHORT</button>
+    </div>
+  </div>
+
+  <!-- Bottom Logs -->
   <div class="logs-panel">
     <table>
       <thead>
         <tr><th>Time</th><th>Side</th><th>Price</th><th>Status</th></tr>
       </thead>
       <tbody id="trade-list">
-        <tr><td colspan="4" style="text-align:center; color:#787b86;">No open trades. Tap BUY/SELL on chart.</td></tr>
+        <tr><td colspan="4" style="text-align:center; color:#787b86; padding:8px;">No open trades. Tap BUY / SELL above.</td></tr>
       </tbody>
     </table>
   </div>
