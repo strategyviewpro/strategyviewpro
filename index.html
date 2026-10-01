@@ -5,55 +5,51 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>StrategyView - Cloud Terminal</title>
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, sans-serif; -webkit-tap-highlight-color: transparent; }
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: #131722; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* Top Bar */
-    header { height: 46px; background: #1e222d; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; z-index: 20; }
-    .brand { font-size: 14px; font-weight: bold; color: #2962ff; display: flex; align-items: center; gap: 6px; }
+    /* Top Nav */
+    header { height: 44px; background: #1e222d; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
+    .brand { font-size: 14px; font-weight: bold; color: #2962ff; }
     .top-actions { display: flex; align-items: center; gap: 6px; }
-    .cur-btn { background: #131722; color: #d1d4dc; border: 1px solid #2a2e39; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
-    .wallet-box { background: #131722; border: 1px solid #2a2e39; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+    .cur-btn { background: #131722; color: #d1d4dc; border: 1px solid #2a2e39; padding: 3px 6px; border-radius: 4px; font-size: 11px; }
+    .wallet-box { background: #131722; border: 1px solid #2a2e39; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
     .fund-val { color: #26a69a; font-weight: bold; }
 
-    /* Replay Sub-bar (Point 5) */
+    /* Replay Sub-bar */
     .replay-bar { height: 36px; background: #181c27; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 11px; flex-shrink: 0; }
-    .replay-status { color: #d29922; font-weight: 600; display: flex; align-items: center; gap: 4px; }
+    .replay-status { color: #d29922; font-weight: 600; font-size: 11px; }
     .replay-actions { display: flex; gap: 6px; }
-    .btn-replay { background: #d29922; color: #000; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 10px; cursor: pointer; }
-    .btn-step { background: #2a2e39; color: #fff; border: 1px solid #434651; padding: 4px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; }
+    .btn-replay { background: #d29922; color: #000; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
+    .btn-step { background: #2a2e39; color: #fff; border: 1px solid #434651; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
 
-    /* Chart Container */
+    /* Chart Window */
     #chart-box { flex: 1; width: 100%; position: relative; }
 
-    /* Floating Buy/Sell over Chart */
-    .order-overlay { position: absolute; top: 10px; left: 10px; z-index: 10; background: rgba(30, 34, 45, 0.92); border: 1px solid #2a2e39; border-radius: 6px; padding: 6px 10px; display: flex; align-items: center; gap: 6px; box-shadow: 0 4px 10px rgba(0,0,0,0.4); }
-    .qty-input { width: 50px; background: #131722; border: 1px solid #363a45; color: #fff; padding: 4px; border-radius: 4px; font-size: 11px; text-align: center; }
-    .btn-buy { background: #26a69a; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
-    .btn-sell { background: #ef5350; color: #fff; border: none; padding: 6px 12px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
+    /* Bottom Fixed Buy/Sell Pad (Clean & Thumb-Friendly) */
+    .bottom-order-pad { background: #1e222d; border-top: 1px solid #2a2e39; padding: 8px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
+    .qty-box { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #787b86; }
+    .qty-input { width: 55px; background: #131722; border: 1px solid #363a45; color: #fff; padding: 6px; border-radius: 4px; font-size: 12px; text-align: center; }
+    .btn-trade { flex: 1; border: none; padding: 9px; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: pointer; color: #fff; }
+    .btn-buy { background: #26a69a; }
+    .btn-sell { background: #ef5350; }
 
-    /* Bottom Logs */
-    .logs-panel { height: 95px; background: #1e222d; border-top: 1px solid #2a2e39; flex-shrink: 0; font-size: 11px; overflow-y: auto; padding: 6px 10px; }
+    /* Bottom Mini Logs */
+    .logs-panel { height: 75px; background: #131722; border-top: 1px solid #2a2e39; flex-shrink: 0; font-size: 10px; overflow-y: auto; padding: 4px 10px; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 4px 6px; text-align: left; border-bottom: 1px solid #21262d; }
+    th, td { padding: 3px 4px; text-align: left; border-bottom: 1px solid #1e222d; }
     th { color: #787b86; }
 
-    /* Pro Paywall Modal */
+    /* Pro Modal */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
-    .modal-card { background: #1e222d; border: 1px solid #d29922; border-radius: 10px; padding: 20px; max-width: 380px; width: 100%; text-align: center; }
-    .modal-card h3 { color: #d29922; margin-bottom: 10px; font-size: 16px; }
-    .modal-card p { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 15px; }
-    .btn-upgrade { background: #d29922; color: #000; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
-    .btn-close { background: none; border: none; color: #787b86; margin-top: 10px; font-size: 12px; cursor: pointer; }
+    .modal-card { background: #1e222d; border: 1px solid #d29922; border-radius: 10px; padding: 20px; max-width: 360px; width: 100%; text-align: center; }
   </style>
 </head>
 <body>
 
-  <!-- Top Navigation -->
+  <!-- Top Nav -->
   <header>
-    <div class="brand">
-      <span>⚡ StrategyView</span>
-    </div>
+    <div class="brand">⚡ StrategyView</div>
     <div class="top-actions">
       <select class="cur-btn" id="currency-select" onchange="switchCurrency()">
         <option value="INR">INR (₹)</option>
@@ -66,11 +62,10 @@
     </div>
   </header>
 
-  <!-- Point 5: Bar Replay Engine Toolbar -->
+  <!-- Bar Replay Toolbar -->
   <div class="replay-bar">
     <div class="replay-status">
-      <span>⏪ Replay:</span>
-      <span id="replay-badge">3 Sessions Left</span>
+      <span>⏪ Replay: </span><b id="replay-badge" style="color:#d29922;">3 Left</b>
     </div>
     <div class="replay-actions">
       <button class="btn-replay" onclick="triggerReplaySession()">▶ Start Replay</button>
@@ -78,24 +73,29 @@
     </div>
   </div>
 
-  <!-- Chart & Floating Pad -->
+  <!-- Chart View -->
   <div id="chart-box">
-    <div class="order-overlay">
-      <input type="number" id="trade-qty" class="qty-input" value="0.05" step="0.01">
-      <button class="btn-buy" onclick="runTrade('BUY')">BUY</button>
-      <button class="btn-sell" onclick="runTrade('SELL')">SELL</button>
-    </div>
     <div id="tv_chart" style="height:100%; width:100%;"></div>
   </div>
 
-  <!-- Logs -->
+  <!-- Bottom Order Pad (Cleanly placed at bottom) -->
+  <div class="bottom-order-pad">
+    <div class="qty-box">
+      <span>Qty:</span>
+      <input type="number" id="trade-qty" class="qty-input" value="0.05" step="0.01">
+    </div>
+    <button class="btn-trade btn-buy" onclick="runTrade('BUY')">BUY / LONG</button>
+    <button class="btn-trade btn-sell" onclick="runTrade('SELL')">SELL / SHORT</button>
+  </div>
+
+  <!-- Orders Log -->
   <div class="logs-panel">
     <table>
       <thead>
         <tr><th>Time</th><th>Side</th><th>Price</th><th>Status</th></tr>
       </thead>
       <tbody id="trade-list">
-        <tr><td colspan="4" style="text-align:center; color:#787b86;">No open trades. Tap BUY/SELL on chart.</td></tr>
+        <tr><td colspan="4" style="text-align:center; color:#787b86; padding:4px;">No trades taken yet.</td></tr>
       </tbody>
     </table>
   </div>
@@ -103,10 +103,10 @@
   <!-- Pro Modal -->
   <div id="pro-modal" class="modal-overlay">
     <div class="modal-card">
-      <h3>🔒 PRO UNLIMITED REPLAY</h3>
-      <p>Tame aaje tamara <b>3 Free Bar Replay sessions</b> pura kari lidha chhe. Unlimited historical replay, multi-timeframe backtesting ane live statistics unlock karva Pro ma upgrade karo.</p>
-      <button class="btn-upgrade" onclick="alert('Payment Gateway Loading...')">Upgrade to Pro @ ₹599/month</button>
-      <button class="btn-close" onclick="closeProModal()">Close & Stay on Free Plan</button>
+      <h3 style="color:#d29922; margin-bottom:10px; font-size:16px;">🔒 PRO UNLIMITED REPLAY</h3>
+      <p style="font-size:12px; color:#8b949e; line-height:1.5; margin-bottom:15px;">તમારા આજના ૩ ફ્રી રીપ્લે પૂરા થઈ ગયા છે. અનલિમિટેડ બેકટેસ્ટિંગ માટે પ્રો પ્લાન અનલોક કરો.</p>
+      <button style="background:#d29922; color:#000; border:none; padding:10px; width:100%; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer;" onclick="alert('Payment Gateway Loading...')">Upgrade @ ₹599/mo</button>
+      <button style="background:none; border:none; color:#787b86; margin-top:10px; font-size:12px; cursor:pointer;" onclick="closeProModal()">Close</button>
     </div>
   </div>
 
@@ -132,7 +132,6 @@
     const usdRate = 86.5;
     let btcPrice = 66000;
 
-    // Point 5: Daily 3 Replay Limit System
     let replaysAvailable = 3;
     let isReplayActive = false;
 
@@ -140,8 +139,8 @@
       if (replaysAvailable > 0) {
         replaysAvailable--;
         isReplayActive = true;
-        document.getElementById('replay-badge').innerText = `${replaysAvailable} Left Today`;
-        alert(`Bar Replay Mode Activated! (${replaysAvailable} sessions remaining today). Tap 'Next Candle' to advance historical price step-by-step.`);
+        document.getElementById('replay-badge').innerText = `${replaysAvailable} Left`;
+        alert(`⏪ Bar Replay સેશન શરૂ થયું! (${replaysAvailable} બાકી). હવે 'Next Candle' દબાવીને એક-એક કેન્ડલ આગળ વધારી શકો છો.`);
       } else {
         document.getElementById('pro-modal').style.display = 'flex';
       }
@@ -149,15 +148,13 @@
 
     function stepNextBar() {
       if (!isReplayActive) {
-        alert("Pela 'Start Replay' button dabavo!");
+        alert("પહેલા 'Start Replay' બટન દબાવો!");
       } else {
-        alert("⏭ Moving to next candle in historical sequence...");
+        alert("⏭ આગલી કેન્ડલ લોડ થઈ રહી છે...");
       }
     }
 
-    function closeProModal() {
-      document.getElementById('pro-modal').style.display = 'none';
-    }
+    function closeProModal() { document.getElementById('pro-modal').style.display = 'none'; }
 
     async function fetchBtc() {
       try {
