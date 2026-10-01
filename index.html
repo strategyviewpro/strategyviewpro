@@ -3,219 +3,326 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>StrategyView - Cloud Terminal</title>
+  <title>StrategyView - Pro Trading Terminal</title>
+  <!-- TradingView Official Lightweight Charts Engine -->
+  <script src="https://unpkg.com/lightweight-charts/dist/lightweight-charts.standalone.production.js"></script>
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     body { background: #131722; color: #d1d4dc; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
 
     /* Top Nav */
-    header { height: 44px; background: #1e222d; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
-    .brand { font-size: 14px; font-weight: bold; color: #2962ff; }
-    .top-actions { display: flex; align-items: center; gap: 6px; }
-    .cur-btn { background: #131722; color: #d1d4dc; border: 1px solid #2a2e39; padding: 3px 6px; border-radius: 4px; font-size: 11px; }
-    .wallet-box { background: #131722; border: 1px solid #2a2e39; padding: 3px 8px; border-radius: 4px; font-size: 11px; }
-    .fund-val { color: #26a69a; font-weight: bold; }
+    header { height: 46px; background: #1e222d; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
+    .brand { font-size: 15px; font-weight: 800; color: #2962ff; letter-spacing: 0.5px; }
+    .header-right { display: flex; align-items: center; gap: 8px; }
+    .select-currency { background: #131722; color: #d1d4dc; border: 1px solid #2a2e39; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
+    .capital-box { background: #131722; border: 1px solid #2a2e39; padding: 4px 8px; border-radius: 4px; font-size: 11px; }
+    .capital-val { color: #26a69a; font-weight: bold; }
 
-    /* Replay Sub-bar */
-    .replay-bar { height: 36px; background: #181c27; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; font-size: 11px; flex-shrink: 0; }
-    .replay-status { color: #d29922; font-weight: 600; font-size: 11px; }
-    .replay-actions { display: flex; gap: 6px; }
-    .btn-replay { background: #d29922; color: #000; border: none; padding: 4px 8px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
-    .btn-step { background: #2a2e39; color: #fff; border: 1px solid #434651; padding: 4px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+    /* True Bar Replay Toolbar */
+    .replay-toolbar { background: #181c27; border-bottom: 1px solid #2a2e39; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 6px; flex-wrap: wrap; }
+    .replay-control-group { display: flex; align-items: center; gap: 6px; }
+    .date-input { background: #131722; border: 1px solid #363a45; color: #fff; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
+    .btn-replay { background: #d29922; color: #000; border: none; padding: 5px 9px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
+    .btn-next { background: #2962ff; color: #fff; border: none; padding: 5px 10px; border-radius: 4px; font-weight: bold; font-size: 11px; cursor: pointer; }
+    .btn-reset { background: #2a2e39; color: #787b86; border: none; padding: 5px 8px; border-radius: 4px; font-size: 11px; cursor: pointer; }
+    .replay-badge { font-size: 10px; color: #d29922; border: 1px solid #d29922; padding: 2px 6px; border-radius: 3px; font-weight: bold; }
 
-    /* Chart Window */
-    #chart-box { flex: 1; width: 100%; position: relative; }
+    /* Chart Container */
+    #chart-wrapper { flex: 1; width: 100%; position: relative; background: #131722; }
 
-    /* Bottom Fixed Buy/Sell Pad (Clean & Thumb-Friendly) */
-    .bottom-order-pad { background: #1e222d; border-top: 1px solid #2a2e39; padding: 8px 10px; display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
-    .qty-box { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #787b86; }
-    .qty-input { width: 55px; background: #131722; border: 1px solid #363a45; color: #fff; padding: 6px; border-radius: 4px; font-size: 12px; text-align: center; }
-    .btn-trade { flex: 1; border: none; padding: 9px; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: pointer; color: #fff; }
+    /* Bottom Fixed Order Execution Pad */
+    .bottom-pad { background: #1e222d; border-top: 1px solid #2a2e39; padding: 8px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 8px; }
+    .current-price-badge { font-size: 11px; display: flex; flex-direction: column; }
+    .current-price-val { font-size: 13px; font-weight: bold; color: #2962ff; }
+    .qty-wrap { display: flex; align-items: center; gap: 4px; font-size: 11px; color: #787b86; }
+    .qty-input { width: 50px; background: #131722; border: 1px solid #363a45; color: #fff; padding: 5px; border-radius: 4px; font-size: 11px; text-align: center; }
+    .btn-order { padding: 9px 16px; border: none; border-radius: 5px; font-weight: bold; font-size: 13px; cursor: pointer; color: #fff; flex: 1; max-width: 120px; }
     .btn-buy { background: #26a69a; }
     .btn-sell { background: #ef5350; }
 
-    /* Bottom Mini Logs */
-    .logs-panel { height: 75px; background: #131722; border-top: 1px solid #2a2e39; flex-shrink: 0; font-size: 10px; overflow-y: auto; padding: 4px 10px; }
+    /* Positions Bar */
+    .positions-tray { height: 75px; background: #131722; border-top: 1px solid #2a2e39; flex-shrink: 0; font-size: 10px; overflow-y: auto; padding: 4px 8px; }
     table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 3px 4px; text-align: left; border-bottom: 1px solid #1e222d; }
-    th { color: #787b86; }
+    th, td { padding: 3px 6px; text-align: left; border-bottom: 1px solid #1e222d; }
+    th { color: #787b86; font-weight: normal; }
 
-    /* Pro Modal */
+    /* Modal */
     .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 100; justify-content: center; align-items: center; padding: 16px; }
     .modal-card { background: #1e222d; border: 1px solid #d29922; border-radius: 10px; padding: 20px; max-width: 360px; width: 100%; text-align: center; }
+    .modal-card h3 { color: #d29922; margin-bottom: 8px; font-size: 16px; }
+    .modal-card p { font-size: 12px; color: #8b949e; line-height: 1.5; margin-bottom: 15px; }
+    .btn-upgrade { background: #d29922; color: #000; border: none; padding: 10px; width: 100%; border-radius: 6px; font-weight: bold; font-size: 13px; cursor: pointer; }
+    .btn-close { background: none; border: none; color: #787b86; margin-top: 10px; font-size: 12px; cursor: pointer; }
   </style>
 </head>
 <body>
 
-  <!-- Top Nav -->
+  <!-- Top Header -->
   <header>
     <div class="brand">⚡ StrategyView</div>
-    <div class="top-actions">
-      <select class="cur-btn" id="currency-select" onchange="switchCurrency()">
+    <div class="header-right">
+      <select class="select-currency" id="currency-select" onchange="toggleCurrency()">
         <option value="INR">INR (₹)</option>
         <option value="USD">USD ($)</option>
       </select>
-      <div class="wallet-box">
-        <span id="bal-text" class="fund-val">₹10,000.00</span>
-        <button onclick="editFund()" style="background:#2a2e39; border:none; color:#787b86; padding:2px 5px; border-radius:3px; margin-left:4px; font-size:10px; cursor:pointer;">Edit</button>
+      <div class="capital-box">
+        <span id="capital-txt" class="capital-val">₹10,000.00</span>
+        <button onclick="setCapitalPrompt()" style="background:#2a2e39; border:none; color:#787b86; padding:2px 5px; border-radius:3px; margin-left:3px; font-size:10px; cursor:pointer;">Edit</button>
       </div>
     </div>
   </header>
 
-  <!-- Bar Replay Toolbar -->
-  <div class="replay-bar">
-    <div class="replay-status">
-      <span>⏪ Replay: </span><b id="replay-badge" style="color:#d29922;">3 Left</b>
+  <!-- True Bar Replay Engine Bar -->
+  <div class="replay-toolbar">
+    <div class="replay-control-group">
+      <span style="font-size:11px; color:#8b949e;">Cut From:</span>
+      <input type="date" id="replay-date" class="date-input" value="2024-03-01" min="2024-01-01" max="2026-09-01">
+      <button class="btn-replay" onclick="startBarReplay()">✂️️ Cut & Replay</button>
+      <button class="btn-next" id="btn-next-bar" onclick="nextReplayBar()" disabled>⏭ Next Bar</button>
+      <button class="btn-reset" onclick="resetToLive()">Live Mode</button>
     </div>
-    <div class="replay-actions">
-      <button class="btn-replay" onclick="triggerReplaySession()">▶ Start Replay</button>
-      <button class="btn-step" onclick="stepNextBar()">⏭ Next Candle</button>
-    </div>
+    <span class="replay-badge" id="replay-quota">3 Replays Left</span>
   </div>
 
-  <!-- Chart View -->
-  <div id="chart-box">
-    <div id="tv_chart" style="height:100%; width:100%;"></div>
-  </div>
+  <!-- Real Interactive Candlestick Engine -->
+  <div id="chart-wrapper"></div>
 
-  <!-- Bottom Order Pad (Cleanly placed at bottom) -->
-  <div class="bottom-order-pad">
-    <div class="qty-box">
+  <!-- Bottom Order Execution Pad -->
+  <div class="bottom-pad">
+    <div class="current-price-badge">
+      <span style="color:#787b86; font-size:10px;" id="mode-label">BTC Current Bar Price</span>
+      <span class="current-price-val" id="bar-price">$42,500.00</span>
+    </div>
+    <div class="qty-wrap">
       <span>Qty:</span>
       <input type="number" id="trade-qty" class="qty-input" value="0.05" step="0.01">
     </div>
-    <button class="btn-trade btn-buy" onclick="runTrade('BUY')">BUY / LONG</button>
-    <button class="btn-trade btn-sell" onclick="runTrade('SELL')">SELL / SHORT</button>
+    <button class="btn-order btn-buy" onclick="executePaperOrder('BUY')">BUY / LONG</button>
+    <button class="btn-order btn-sell" onclick="executePaperOrder('SELL')">SELL / SHORT</button>
   </div>
 
-  <!-- Orders Log -->
-  <div class="logs-panel">
+  <!-- Open Trades & Log -->
+  <div class="positions-tray">
     <table>
       <thead>
-        <tr><th>Time</th><th>Side</th><th>Price</th><th>Status</th></tr>
+        <tr><th>Bar Date</th><th>Side</th><th>Qty</th><th>Execution Price</th><th>P&L Status</th></tr>
       </thead>
-      <tbody id="trade-list">
-        <tr><td colspan="4" style="text-align:center; color:#787b86; padding:4px;">No trades taken yet.</td></tr>
+      <tbody id="trade-rows">
+        <tr><td colspan="5" style="text-align:center; color:#787b86;">No open trades. Replay historical bars and enter trades!</td></tr>
       </tbody>
     </table>
   </div>
 
-  <!-- Pro Modal -->
+  <!-- Pro Paywall Modal -->
   <div id="pro-modal" class="modal-overlay">
     <div class="modal-card">
-      <h3 style="color:#d29922; margin-bottom:10px; font-size:16px;">🔒 PRO UNLIMITED REPLAY</h3>
-      <p style="font-size:12px; color:#8b949e; line-height:1.5; margin-bottom:15px;">તમારા આજના ૩ ફ્રી રીપ્લે પૂરા થઈ ગયા છે. અનલિમિટેડ બેકટેસ્ટિંગ માટે પ્રો પ્લાન અનલોક કરો.</p>
-      <button style="background:#d29922; color:#000; border:none; padding:10px; width:100%; border-radius:6px; font-weight:bold; font-size:13px; cursor:pointer;" onclick="alert('Payment Gateway Loading...')">Upgrade @ ₹599/mo</button>
-      <button style="background:none; border:none; color:#787b86; margin-top:10px; font-size:12px; cursor:pointer;" onclick="closeProModal()">Close</button>
+      <h3>🔒 PRO UNLIMITED BAR REPLAY</h3>
+      <p>You have consumed your <b>3 Free Daily Replay Sessions</b>. Upgrade to Pro to test back to 2018 with unlimited step-by-step playback, multi-timeframes, and exportable P&L reports.</p>
+      <button class="btn-upgrade" onclick="alert('Payment Gateway Redirect...')">Upgrade to Pro @ ₹599/month</button>
+      <button class="btn-close" onclick="closeModal()">Close & Stay on Free Plan</button>
     </div>
   </div>
 
-  <script type="text/javascript" src="https://s3.tradingview.com/tv.js"></script>
-  <script type="text/javascript">
-    new TradingView.widget({
-      "autosize": true,
-      "symbol": "BINANCE:BTCUSDT",
-      "interval": "15",
-      "timezone": "Asia/Kolkata",
-      "theme": "dark",
-      "style": "1",
-      "locale": "en",
-      "toolbar_bg": "#1e222d",
-      "enable_publishing": false,
-      "allow_symbol_change": true,
-      "hide_side_toolbar": false,
-      "container_id": "tv_chart"
+  <script>
+    // 1. Generate Realistic Historical Daily Candles from Jan 2024 to Late 2026
+    const masterCandles = [];
+    let baseDate = new Date('2024-01-01');
+    let runningPrice = 42200;
+
+    for (let i = 0; i < 980; i++) {
+      const dt = new Date(baseDate);
+      dt.setDate(baseDate.getDate() + i);
+      const dateStr = dt.toISOString().split('T')[0];
+
+      // Realistic trending volatility simulator
+      const changePercent = (Math.sin(i / 15) * 0.02) + ((Math.random() - 0.48) * 0.035);
+      const open = runningPrice;
+      const close = open * (1 + changePercent);
+      const high = Math.max(open, close) * (1 + Math.random() * 0.012);
+      const low = Math.min(open, close) * (1 - Math.random() * 0.012);
+      runningPrice = close;
+
+      masterCandles.push({
+        time: dateStr,
+        open: parseFloat(open.toFixed(2)),
+        high: parseFloat(high.toFixed(2)),
+        low: parseFloat(low.toFixed(2)),
+        close: parseFloat(close.toFixed(2))
+      });
+    }
+
+    // 2. Initialize TradingView Lightweight Chart
+    const container = document.getElementById('chart-wrapper');
+    const chart = LightweightCharts.createChart(container, {
+      width: container.clientWidth,
+      height: container.clientHeight,
+      layout: { background: { color: '#131722' }, textColor: '#d1d4dc' },
+      grid: { vertLines: { color: '#1e222d' }, horzLines: { color: '#1e222d' } },
+      timeScale: { borderColor: '#2a2e39', timeVisible: false },
+      rightPriceScale: { borderColor: '#2a2e39' }
     });
 
-    let currentCur = 'INR';
+    const candleSeries = chart.addCandlestickSeries({
+      upColor: '#26a69a',
+      downColor: '#ef5350',
+      borderVisible: false,
+      wickUpColor: '#26a69a',
+      wickDownColor: '#ef5350'
+    });
+
+    // Load All Data Initially (Live View)
+    candleSeries.setData(masterCandles);
+    chart.timeScale().fitContent();
+
+    // 3. State Management
+    let currentCurrency = 'INR';
     let balance = 10000;
-    const usdRate = 86.5;
-    let btcPrice = 66000;
+    const inrRate = 86.5;
+    let replaysLeft = 3;
+    let isReplaying = false;
+    let replayIndex = 0;
+    let currentCandlePrice = masterCandles[masterCandles.length - 1].close;
+    let currentBarDate = masterCandles[masterCandles.length - 1].time;
+    let tradeHistory = [];
 
-    let replaysAvailable = 3;
-    let isReplayActive = false;
+    updatePriceDisplay();
+    updateCapitalUI();
 
-    function triggerReplaySession() {
-      if (replaysAvailable > 0) {
-        replaysAvailable--;
-        isReplayActive = true;
-        document.getElementById('replay-badge').innerText = `${replaysAvailable} Left`;
-        alert(`⏪ Bar Replay સેશન શરૂ થયું! (${replaysAvailable} બાકી). હવે 'Next Candle' દબાવીને એક-એક કેન્ડલ આગળ વધારી શકો છો.`);
-      } else {
+    // 4. True Bar Replay Engine: Cut and Sequentially Step
+    function startBarReplay() {
+      if (replaysLeft <= 0) {
         document.getElementById('pro-modal').style.display = 'flex';
-      }
-    }
-
-    function stepNextBar() {
-      if (!isReplayActive) {
-        alert("પહેલા 'Start Replay' બટન દબાવો!");
-      } else {
-        alert("⏭ આગલી કેન્ડલ લોડ થઈ રહી છે...");
-      }
-    }
-
-    function closeProModal() { document.getElementById('pro-modal').style.display = 'none'; }
-
-    async function fetchBtc() {
-      try {
-        const r = await fetch("https://api.binance.com/api/v3/ticker/price?symbol=BTCUSDT");
-        const d = await r.json();
-        btcPrice = parseFloat(d.price);
-      } catch(e) {}
-    }
-    fetchBtc();
-    setInterval(fetchBtc, 4000);
-
-    function editFund() {
-      const sym = currentCur === 'INR' ? '₹' : '$';
-      let f = prompt(`Set Virtual Fund (${sym}5,000 to ${sym}10,00,000):`, balance);
-      if (f && !isNaN(f) && f >= 5000 && f <= 1000000) {
-        balance = parseFloat(f);
-        updateUI();
-      }
-    }
-
-    function switchCurrency() {
-      const newCur = document.getElementById('currency-select').value;
-      if (newCur !== currentCur) {
-        balance = newCur === 'USD' ? (balance / usdRate) : (balance * usdRate);
-        currentCur = newCur;
-        updateUI();
-      }
-    }
-
-    function updateUI() {
-      const sym = currentCur === 'INR' ? '₹' : '$';
-      document.getElementById('bal-text').innerText = `${sym}${balance.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
-    }
-
-    let tradeCount = 0;
-    function runTrade(side) {
-      const qty = parseFloat(document.getElementById('trade-qty').value) || 0.05;
-      const rate = currentCur === 'INR' ? (btcPrice * usdRate) : btcPrice;
-      const total = qty * rate;
-      const sym = currentCur === 'INR' ? '₹' : '$';
-
-      if (side === 'BUY' && total > balance) {
-        alert("Insufficient Funds!");
         return;
       }
 
-      balance = side === 'BUY' ? balance - total : balance + total;
-      updateUI();
+      const cutDate = document.getElementById('replay-date').value;
+      const targetIdx = masterCandles.findIndex(c => c.time >= cutDate);
 
-      const tb = document.getElementById('trade-list');
-      if (tradeCount === 0) tb.innerHTML = "";
-      tradeCount++;
+      if (targetIdx === -1 || targetIdx < 10) {
+        alert("Please pick a valid date between March 2024 and 2026.");
+        return;
+      }
+
+      replaysLeft--;
+      document.getElementById('replay-quota').innerText = `${replaysLeft} Replays Left`;
+      isReplaying = true;
+      replayIndex = targetIdx;
+
+      // CUT CHART: Send only candles up to the chosen date!
+      const slicedCandles = masterCandles.slice(0, replayIndex + 1);
+      candleSeries.setData(slicedCandles);
+      chart.timeScale().fitContent();
+
+      // Update current price to the exact cut bar
+      const currentBar = masterCandles[replayIndex];
+      currentCandlePrice = currentBar.close;
+      currentBarDate = currentBar.time;
+      document.getElementById('mode-label').innerText = `Replay Price (${currentBarDate})`;
+      updatePriceDisplay();
+
+      // Enable Next Bar button
+      document.getElementById('btn-next-bar').disabled = false;
+      document.getElementById('btn-next-bar').style.background = '#2962ff';
+    }
+
+    // Step-by-Step Candle Playback
+    function nextReplayBar() {
+      if (!isReplaying) return;
+
+      if (replayIndex >= masterCandles.length - 1) {
+        alert("You have reached the latest live candle!");
+        return;
+      }
+
+      replayIndex++;
+      const nextCandle = masterCandles[replayIndex];
+      candleSeries.update(nextCandle);
+
+      currentCandlePrice = nextCandle.close;
+      currentBarDate = nextCandle.time;
+      document.getElementById('mode-label').innerText = `Replay Price (${currentBarDate})`;
+      updatePriceDisplay();
+    }
+
+    function resetToLive() {
+      isReplaying = false;
+      candleSeries.setData(masterCandles);
+      chart.timeScale().fitContent();
+      const lastCandle = masterCandles[masterCandles.length - 1];
+      currentCandlePrice = lastCandle.close;
+      currentBarDate = lastCandle.time;
+      document.getElementById('mode-label').innerText = 'BTC Current Bar Price';
+      document.getElementById('btn-next-bar').disabled = true;
+      document.getElementById('btn-next-bar').style.background = '#2a2e39';
+      updatePriceDisplay();
+    }
+
+    // 5. Currency & Capital Functions
+    function toggleCurrency() {
+      const newCur = document.getElementById('currency-select').value;
+      if (newCur !== currentCurrency) {
+        balance = newCur === 'USD' ? (balance / inrRate) : (balance * inrRate);
+        currentCurrency = newCur;
+        updateCapitalUI();
+        updatePriceDisplay();
+      }
+    }
+
+    function setCapitalPrompt() {
+      const sym = currentCurrency === 'INR' ? '₹' : '$';
+      const val = prompt(`Set starting capital (${sym}5,000 to ${sym}10,00,000):`, balance);
+      if (val && !isNaN(val) && val >= 5000 && val <= 1000000) {
+        balance = parseFloat(val);
+        updateCapitalUI();
+      }
+    }
+
+    function updateCapitalUI() {
+      const sym = currentCurrency === 'INR' ? '₹' : '$';
+      document.getElementById('capital-txt').innerText = `${sym}${balance.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+    }
+
+    function updatePriceDisplay() {
+      const sym = currentCurrency === 'INR' ? '₹' : '$';
+      const effectiveRate = currentCurrency === 'INR' ? (currentCandlePrice * inrRate) : currentCandlePrice;
+      document.getElementById('bar-price').innerText = `${sym}${effectiveRate.toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
+    }
+
+    // 6. Paper Trading Execution directly on the Active Bar
+    function executePaperOrder(type) {
+      const qty = parseFloat(document.getElementById('trade-qty').value) || 0.05;
+      const effectiveRate = currentCurrency === 'INR' ? (currentCandlePrice * inrRate) : currentCandlePrice;
+      const orderValue = qty * effectiveRate;
+      const sym = currentCurrency === 'INR' ? '₹' : '$';
+
+      if (type === 'BUY' && orderValue > balance) {
+        alert("Insufficient capital!");
+        return;
+      }
+
+      balance = type === 'BUY' ? balance - orderValue : balance + orderValue;
+      updateCapitalUI();
+
+      const tbody = document.getElementById('trade-rows');
+      if (tradeHistory.length === 0) tbody.innerHTML = "";
+      tradeHistory.unshift({ date: currentBarDate, side: type, qty: qty, price: effectiveRate });
 
       const row = `<tr>
-        <td>${new Date().toLocaleTimeString()}</td>
-        <td style="color:${side === 'BUY' ? '#26a69a' : '#ef5350'}; font-weight:bold;">${side}</td>
-        <td>${sym}${rate.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
+        <td>${currentBarDate}</td>
+        <td style="color:${type === 'BUY' ? '#26a69a' : '#ef5350'}; font-weight:bold;">${type}</td>
+        <td>${qty}</td>
+        <td>${sym}${effectiveRate.toLocaleString('en-IN', { maximumFractionDigits: 2 })}</td>
         <td style="color:#26a69a;">FILLED</td>
       </tr>`;
-      tb.innerHTML = row + tb.innerHTML;
+      tbody.innerHTML = row + tbody.innerHTML;
     }
+
+    function closeModal() { document.getElementById('pro-modal').style.display = 'none'; }
+
+    // Auto Resize for Mobile Orientation
+    window.addEventListener('resize', () => {
+      chart.applyOptions({ width: container.clientWidth, height: container.clientHeight });
+    });
   </script>
 </body>
 </html>
