@@ -4,13 +4,20 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <title>StrategyView - Trading Terminal</title>
-  <!-- Ultra-Fast High Reliability CDN for Lightweight Charts -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/lightweight-charts/4.1.1/lightweight-charts.standalone.production.js"></script>
+  
+  <!-- High Reliability Primary & Backup CDN for Candlesticks Engine -->
+  <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"></script>
+  <script>
+    if (!window.LightweightCharts) {
+      document.write('<script src="https://unpkg.com/lightweight-charts@4.1.1/dist/lightweight-charts.standalone.production.js"><\/script>');
+    }
+  </script>
+
   <style>
     * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-tap-highlight-color: transparent; }
     html, body { height: 100%; width: 100%; background: #131722; color: #d1d4dc; display: flex; flex-direction: column; overflow: hidden; }
 
-    /* Top Bar */
+    /* Top Nav */
     header { height: 44px; background: #1e222d; border-bottom: 1px solid #2a2e39; display: flex; align-items: center; justify-content: space-between; padding: 0 10px; flex-shrink: 0; }
     .brand { font-size: 15px; font-weight: 800; color: #2962ff; }
     .top-right { display: flex; align-items: center; gap: 6px; }
@@ -18,7 +25,7 @@
     .fund-tag { background: #131722; border: 1px solid #2a2e39; padding: 3px 6px; border-radius: 4px; font-size: 11px; }
     .fund-val { color: #26a69a; font-weight: bold; }
 
-    /* Bar Replay Toolbar (Visible on Laptop & Mobile) */
+    /* Bar Replay Toolbar (Laptop & Mobile Compatible) */
     .replay-bar { background: #181c27; border-bottom: 1px solid #2a2e39; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 6px; flex-wrap: wrap; }
     .controls-left { display: flex; align-items: center; gap: 5px; flex-wrap: wrap; }
     .cut-date-input { background: #131722; border: 1px solid #363a45; color: #fff; padding: 4px 6px; border-radius: 4px; font-size: 11px; }
@@ -28,10 +35,10 @@
     .btn-live { background: #2a2e39; color: #8b949e; }
     .quota-badge { font-size: 10px; color: #d29922; border: 1px solid #d29922; padding: 2px 5px; border-radius: 3px; font-weight: bold; }
 
-    /* Chart Container (Fixed Viewport) */
-    #chart-area { flex: 1 1 auto; width: 100%; min-height: 250px; position: relative; background: #131722; }
+    /* Chart Area */
+    #chart-area { flex: 1 1 auto; width: 100%; min-height: 260px; position: relative; background: #131722; }
 
-    /* Bottom Order Execution Pad */
+    /* Bottom Fixed Order Execution Pad */
     .order-pad { background: #1e222d; border-top: 1px solid #2a2e39; padding: 6px 10px; display: flex; align-items: center; justify-content: space-between; flex-shrink: 0; gap: 6px; }
     .price-box { display: flex; flex-direction: column; min-width: 90px; }
     .price-label { font-size: 9px; color: #787b86; }
@@ -42,7 +49,7 @@
     .btn-buy { background: #26a69a; }
     .btn-sell { background: #ef5350; }
 
-    /* Positions Log Tray */
+    /* Trades Log Tray */
     .trades-tray { height: 75px; background: #131722; border-top: 1px solid #2a2e39; flex-shrink: 0; font-size: 10px; overflow-y: auto; padding: 4px 8px; }
     table { width: 100%; border-collapse: collapse; }
     th, td { padding: 3px 4px; text-align: left; border-bottom: 1px solid #1e222d; }
@@ -122,16 +129,16 @@
   </div>
 
   <script>
-    // 1. Generate Historical Candlestick Data (2024 to 2026)
+    // 1. Generate Realistic Historical Candlestick Data (From Jan 2024 to Late 2026)
     const masterData = [];
-    let startEpoch = new Date(2024, 0, 1).getTime();
+    let baseTime = new Date('2024-01-01T00:00:00Z');
     let currentP = 42500;
 
     for (let i = 0; i < 980; i++) {
-      let d = new Date(startEpoch + (i * 86400000));
-      let y = d.getFullYear();
-      let m = String(d.getMonth() + 1).padStart(2, '0');
-      let day = String(d.getDate()).padStart(2, '0');
+      let d = new Date(baseTime.getTime() + (i * 86400000));
+      let y = d.getUTCFullYear();
+      let m = String(d.getUTCMonth() + 1).padStart(2, '0');
+      let day = String(d.getUTCDate()).padStart(2, '0');
       let dtString = `${y}-${m}-${day}`;
 
       let change = (Math.sin(i / 14) * 0.018) + ((Math.random() - 0.485) * 0.032);
@@ -150,11 +157,16 @@
       });
     }
 
-    // 2. Initialize Lightweight Chart Engine with Safe Dimensions
+    // 2. Initialize Lightweight Chart Engine with Safe Loader
     let chart, candleSeries;
     const container = document.getElementById('chart-area');
 
-    function initTradingChart() {
+    function checkAndInitChart() {
+      if (typeof LightweightCharts === 'undefined') {
+        setTimeout(checkAndInitChart, 150);
+        return;
+      }
+
       const containerWidth = container.clientWidth || window.innerWidth;
       const containerHeight = container.clientHeight || (window.innerHeight - 170);
 
@@ -179,8 +191,11 @@
       chart.timeScale().fitContent();
     }
 
-    // Run init after DOM is fully ready
-    window.addEventListener('load', initTradingChart);
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', checkAndInitChart);
+    } else {
+      checkAndInitChart();
+    }
 
     // 3. Replay Logic
     let currentCurrency = 'INR';
